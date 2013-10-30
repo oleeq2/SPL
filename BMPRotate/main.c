@@ -32,10 +32,10 @@ BMPHeader* readBMPHeader(FILE *file)
 
 int checkBMP(BMPHeader* header) 
 {
-    int ret = 1;
+    int ret = 0;
 
     if( (*header).biBitCount != 24 && (*header).bfType != BM    )
-        ret = 0;
+        ret = 1;
     
     return ret;
 }
@@ -94,12 +94,11 @@ int main(int argc,char *argv[])
         return -1;
 
     file_header = *readBMPHeader(file_in);
-/*    if(checkBMP(&file_header))
+    if(checkBMP(&file_header))
     {
         printf("Error image format");
         return -1;
     }
- */ 
     lines_num    = file_header.biHeigth;
     lines_length = roundToQuat(file_header.biWidth); 
 
