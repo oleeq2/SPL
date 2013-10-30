@@ -8,7 +8,6 @@ typedef struct
     int bfSize;
     int bfReserved;
     int bfOffBits;
-
     int biSize;
     int biWidth;
     int biHeigth;
@@ -41,30 +40,47 @@ int checkBMP(BMPHeader* header)
     return ret;
 }
 
-char* bufferRead(FILE* file,int offset,int lenght,char* buffer)
+int roundToQuat(int num)
 {
-    fseek(file,offset,SEEK_SET);
-    fread(buffer,lenght,1,file);
+    int i;
+    i = num;
+    while(i % 4 != 0)
+        i++;
 
-    return buffer;
+    return i;
 }
 
-void swapString(char* fstr,char* sstr,int str_len)
+void LinesSwap(char *line,char *an_line,int line_length)
 {
-    char* tmp_str = calloc(str_len,1);
+    char tmp_byte;
+    int i;
+    
+    for(i = 0; i < line_length; i++)
+    {
+        tmp_byte = line[i];
+        line[i] = an_line[i];
+        an_line[i] = tmp_byte;
+    }
 
-    memcpy(tmp_str,fstr,str_len);
-    memcpy(fstr,sstr,str_len);
-    memcpy(sstr,tmp_str,str_len);
-
-    free(tmp_str);
+    return;
 }
 
-int main(int argc, const char *argv[])
+void MirrorImage(char *image_buffer, int lines_num, int line_length)
+{
+    int i;
+    
+    for(i = 0; i <= lines_num/2; i++)
+    {
+        LinesSwap( image_buffer + line_length*i, image_buffer + line_length*(lines_num - i), line_length);
+    }
+}
+
+
+int main(int argc,char *argv[])
 {
     FILE *file_in,*file_out;
     char *fname_in,*fname_out;
-    int lines_num,columns_num;
+    int lines_num,lines_length;
     int image_size;
     BMPHeader file_header;
     char *image_buffer; 
@@ -74,15 +90,30 @@ int main(int argc, const char *argv[])
     fname_in  = argv[1];
     fname_out = argv[2];
     
-    if((file_in = fopen(fname_in,"r") == NULL)
-            return -1;
-
-    file_header = readBMPHeader(fname_in);
-    if(checkBMP(&file_header))
+    if((file_in = fopen(fname_in, "r")) == NULL)
         return -1;
 
-    lines_num   = header.heigth;
-    columns_num = header.width;
+    file_header = *readBMPHeader(file_in);
+/*    if(checkBMP(&file_header))
+    {
+        printf("Error image format");
+        return -1;
+    }
+ */ 
+    lines_num    = file_header.biHeigth;
+    lines_length = roundToQuat(file_header.biWidth); 
+
+    image_size = 3 * lines_num * lines_length;
+    image_buffer = malloc(image_size);
+
+    fread(image_buffer,image_size,1,file_in);
+    MirrorImage(image_buffer,lines_num,3*lines_length);
+
+    if((file_out = fopen(fname_out, "w+")) == NULL)
+        return -1;
     
-    image_size = 3*
+    fwrite(&file_header, sizeof(file_header), 1, file_out);
+    fwrite(image_buffer, image_size, 1, file_out);
+
+    return 0;
 }
