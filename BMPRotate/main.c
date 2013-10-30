@@ -108,11 +108,15 @@ int main(int argc,char *argv[])
     fread(image_buffer,image_size,1,file_in);
     MirrorImage(image_buffer,lines_num,3*lines_length);
 
-    if((file_out = fopen(fname_out, "w+")) == NULL)
+    file_out = fopen(fname_out, "w+");
+//    if((file_out = fopen(fname_out, "w+")) == NULL)
+    if(file_out == NULL)    
         return -1;
     
     fwrite(&file_header, sizeof(file_header), 1, file_out);
     fwrite(image_buffer, image_size, 1, file_out);
 
+    fclose(file_out);
+    fclose(file_in);
     return 0;
 }
