@@ -52,17 +52,19 @@ int roundToQuat(int num)
 
 void LinesSwap(char *line,char *an_line,int line_length)
 {
-    char tmp_byte;
-    int i;
-    
-    for(i = 0; i < line_length; i++)
-    {
-        tmp_byte = line[i];
-        line[i] = an_line[i];
-        an_line[i] = tmp_byte;
-    }
-
-    return;
+    asm(
+        "xorl %%ebx, %%ebx \n\t \
+        Copy: movb (%%edi, %%ebx,1), %%al \n\t \
+         movb (%%esi, %%ebx,1), %%ah \n\t \
+         xchg %%al, %%ah \n\t \
+         movb %%al, (%%edi, %%ebx,1) \n\t \
+         movb %%ah, (%%esi, %%ebx,1) \n\t \
+         inc %%ebx \n\t \
+         loop Copy"
+         :: "S" (line),"D"(an_line),"c"(line_length)
+         : "%eax", "%ebx" 
+        );
+   return;
 }
 
 void MirrorImage(char *image_buffer, int lines_num, int line_length)
