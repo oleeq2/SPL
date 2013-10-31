@@ -53,16 +53,14 @@ int roundToQuat(int num)
 void LinesSwap(char *line,char *an_line,int line_length)
 {
     asm(
-        "xorl %%ebx, %%ebx \n\t \
-        Copy: movb (%%edi, %%ebx,1), %%al \n\t \
-         movb (%%esi, %%ebx,1), %%ah \n\t \
+        "Copy: movb (%%edi, %%ecx,1), %%al \n\t \
+         movb (%%esi, %%ecx,1), %%ah \n\t \
          xchg %%al, %%ah \n\t \
-         movb %%al, (%%edi, %%ebx,1) \n\t \
-         movb %%ah, (%%esi, %%ebx,1) \n\t \
-         inc %%ebx \n\t \
+         movb %%al, (%%edi, %%ecx,1) \n\t \
+         movb %%ah, (%%esi, %%ecx,1) \n\t \
          loop Copy"
          :: "S" (line),"D"(an_line),"c"(line_length)
-         : "%eax", "%ebx" 
+         : "%eax" 
         );
    return;
 }
